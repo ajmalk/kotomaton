@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-     - cron: '20 21 * * 3'
+    - cron: '20 21 * * 3'
   workflow_dispatch:
 
 env:
@@ -16,21 +16,24 @@ jobs:
   analysis:
     name: Code Analysis
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
     permissions:
       security-events: write # For uploading results
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-    - name: Download Detekt
-      run: |
-        curl --request GET --url $DETEKT_URL --location --output ${{ github.workspace }}/detekt
-    - name: Run Detekt
-      continue-on-error: true
-      run: |
-        java -jar ${{ github.workspace }}/detekt --input ${{ github.workspace }} --base-path ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
-    - name: Upload
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: ${{ github.workspace }}/detekt.sarif.json
-        checkout_path: ${{ github.workspace }}
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'oracle'
+          cache: 'gradle'
+      - name: Run Detekt
+        continue-on-error: true
+        run: ./gradlew detekt
+      - name: Upload
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif
