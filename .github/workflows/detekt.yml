@@ -22,11 +22,13 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Setup Detekt
+    - name: Download Detekt
       run: |
-        dest=$( mktemp -d )
-        curl --request GET --url $DETEKT_URL --location --output $dest/detekt
-        java -jar $dest/detekt --input ${{ github.workspace }} --base-path ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
+        curl --request GET --url $DETEKT_URL --location --output ${{ github.workspace }}/detekt
+    - name: Run Detekt
+      continue-on-error: true
+      run: |
+        java -jar ${{ github.workspace }}/detekt --input ${{ github.workspace }} --base-path ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
     - name: Upload
       uses: github/codeql-action/upload-sarif@v2
       with:
