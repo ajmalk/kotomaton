@@ -25,13 +25,11 @@ jobs:
     - name: Setup Detekt
       run: |
         dest=$( mktemp -d )
-        curl --request GET --url $DETEKT_URL --silent --location --output $dest/detekt
-        chmod a+x $dest/detekt
-        echo $dest >> $GITHUB_PATH
+        curl --request GET --url $DETEKT_URL --location --output $dest/detekt
     - name: Run Detekt
       continue-on-error: true
       run: |
-        java -jar detekt --input ${{ github.workspace }} --base-path ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
+        java -jar $dest/detekt --input ${{ github.workspace }} --base-path ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
     - name: Upload
       uses: github/codeql-action/upload-sarif@v2
       with:
