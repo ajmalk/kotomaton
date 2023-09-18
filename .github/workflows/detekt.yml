@@ -1,16 +1,8 @@
 name: Scan with Detekt
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '20 21 * * 3'
+  workflow_call:
   workflow_dispatch:
-
-env:
-  DETEKT_URL: https://github.com/detekt/detekt/releases/download/v1.23.1/detekt-cli-1.23.1-all.jar
 
 jobs:
   analysis:

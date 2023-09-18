@@ -1,6 +1,7 @@
 plugins {
   kotlin("multiplatform") version "1.9.0"
   id("io.gitlab.arturbosch.detekt") version "1.23.1"
+  id("com.diffplug.spotless") version "6.21.0"
 }
 
 group = "com.kotomaton"
@@ -8,6 +9,25 @@ group = "com.kotomaton"
 version = "0.01"
 
 repositories { mavenCentral() }
+
+spotless {
+  // limit format enforcement to just the files changed by this feature branch
+  ratchetFrom("origin/main")
+
+  format("misc") {
+    // define the files to apply `misc` to
+    target("*.md", ".gitignore", "**/*.yml")
+
+    // define the steps to apply to those files
+    trimTrailingWhitespace()
+    indentWithSpaces(2)
+    endWithNewline()
+  }
+  kotlin {
+    ktfmt("0.42")
+    target("**/*.kt", "**/*.kts")
+  }
+}
 
 detekt {
   toolVersion = "1.23.1"
