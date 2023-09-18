@@ -1,0 +1,24 @@
+name: Presubmit Checks
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '20 21 * * 3'
+  workflow_dispatch:
+
+jobs:
+  formatting:
+    name: Code Formatting
+    permissions:
+      contents: write
+    uses: "./.github/workflows/ktfmt.yml"
+    secrets: inherit
+  analysis:
+    name: Code Analysis
+    permissions:
+      security-events: write
+    uses: "./.github/workflows/detekt.yml"
+    needs: [formatting]

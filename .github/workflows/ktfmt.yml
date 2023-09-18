@@ -1,0 +1,47 @@
+name: Format with ktfmt
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  formatting:
+    name: Code Formatting
+    runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+    permissions:
+      contents: write
+
+    steps:
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app_id: ${{ secrets.BOT_ID }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'oracle'
+          cache: 'gradle'
+      - name: Run Ktfmt
+        run: ./gradlew spotlessApply
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_user_name: aarkling-bot
+          commit_user_email: ajmal93@gmail.com
+          commit_message: Format code with ktfmt
